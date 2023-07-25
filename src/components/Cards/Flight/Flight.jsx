@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,14 +8,30 @@ import "./flights.scss";
 //importing icons
 import { BiSolidBusSchool, BiSolidPlaneTakeOff } from "react-icons/bi";
 import { MdHotel } from "react-icons/md";
+import { FlightContext } from "../../context/FormContext";
 
+const optionList = [
+  { value: "Kathmandu", label: "kathmandu" },
+  { value: "Pokhara", label: "Pokhara" },
+  { value: "Bhadrapur", label: "Bhadrapur" },
+  { value: "Chitwan", label: "Chitwan" },
+  { value: "lukla", label: "lukla" },
+];
+
+const optionWayList = [
+  {
+    value: "One Way",
+    label: "One Way",
+  },
+
+  {
+    value: "Two Way",
+    label: "Two Way",
+  },
+];
 
 const Flight = () => {
-
- 
   const passengerBoxRef = useRef(null);
-
- 
 
   const navigate = useNavigate();
 
@@ -33,79 +49,38 @@ const Flight = () => {
       window.removeEventListener("click", handleClickOutside);
     };
   }, []);
-  const [fromOption, setFromOption] = useState();
-  const [toOption, setToOption] = useState();
-  const [departureDate, setDepartureDate] = useState(null);
-  const [returnDate, setReturnDate] = useState(null);
-  const [adultCount, setAdultCount] = useState(1);
-  const [childCount, setChildCount] = useState(0);
+
   const [showPassengerBox, setShowPassengerBox] = useState(false);
   const [selectedOption, setSelectedOption] = useState("flight");
   const [formError, setFormError] = useState(false);
-  const [selectTripOption, setSelectTripOption] = useState();
 
-   
+  // User this code to use forValues in each and every component of your app
 
-  const optionList = [
-    { value: "Kathmandu", label: "kathmandu" },
-    { value: "Pokhara", label: "Pokhara" },
-    { value: "Bhadrapur", label: "Bhadrapur" },
-    { value: "Chitwan", label: "Chitwan" },
-    { value: "lukla", label: "lukla" },
-  ];
+  const { onFormValueChange, formValues, clearFormValues } =
+    useContext(FlightContext);
 
-  const optionWayList = [
-    {
-      value: "One Way",
-      label: "One Way",
-    },
+  useEffect(() => {
+    clearFormValues();
+    setFormError(false);
+  }, [selectedOption]);
 
-    {
-      value: "Two Way",
-      label: "Two Way",
-    },
-  ];
-
-  function handleFromSelect(data) {
-    setFromOption(data);
-  }
-
-  function handleToSelect(data) {
-    setToOption(data);
-  }
-
-  function handleDepartureDate(date) {
-    if (returnDate && date > returnDate) {
-      setReturnDate(null);
-    }
-    setDepartureDate(date);
-  }
-
-  function handleReturnDate(date) {
-    setReturnDate(date);
-  }
-
-  //updated for context
   function handleIncrementAdultCount() {
-    setAdultCount((prevCount) => prevCount + 1);
-    // incrementAdultCount();
+    onFormValueChange("adultCount", formValues?.adultCount + 1);
   }
 
-  // updated for context api
   function handleDecrementAdultCount() {
-    if (adultCount > 0) {
-      setAdultCount((prevCount) => prevCount - 1);
+    if (formValues?.adultCount > 0) {
+      onFormValueChange("adultCount", formValues?.adultCount - 1);
     }
-    // decrementAdultCount();
   }
 
   function incrementChildCount() {
-    setChildCount((prevCount) => prevCount + 1);
+    onFormValueChange("childCount", formValues?.childCount + 1);
   }
 
   function decrementChildCount() {
-    if (childCount > 0) {
-      setChildCount((prevCount) => prevCount - 1);
+    if (formValues?.childCount > 0) {
+      onFormValueChange("childCount", formValues?.childCount - 1);
     }
   }
 
@@ -114,10 +89,18 @@ const Flight = () => {
   }
 
   function handleValidation() {
-    if (!fromOption || !toOption || !departureDate || !selectTripOption) {
+    if (
+      !formValues?.fromOption ||
+      !formValues?.toOption ||
+      !formValues?.depatureDate ||
+      !formValues?.tripOption
+    ) {
       setFormError(true);
       return;
-    } else if (selectTripOption === "Two Way" && !returnDate) {
+    } else if (
+      formValues?.selectTripOption === "Two Way" &&
+      !formValues?.returnDate
+    ) {
       setFormError(true);
       return;
     } else {
@@ -127,7 +110,11 @@ const Flight = () => {
   }
 
   function busHandleValidation() {
-    if (!fromOption || !toOption || !departureDate) {
+    if (
+      !formValues?.fromOption ||
+      !formValues?.toOption ||
+      !formValues?.depatureDate
+    ) {
       setFormError(true);
       return;
     } else {
@@ -135,6 +122,7 @@ const Flight = () => {
       navigate("/bus");
     }
   }
+
   const renderCard = () => {
     if (selectedOption === "flight") {
       return (
@@ -146,15 +134,16 @@ const Flight = () => {
                   <label htmlFor="">From</label>
                   <Select
                     className={`inputs custom-select ${
-                      formError && !fromOption ? "error" : ""
+                      formError && !formValues?.fromOption ? "error" : ""
                     }`}
                     options={optionList}
                     placeholder="Eg. Kathmandu"
-                    value={fromOption}
-                    onChange={handleFromSelect}
+                    onChange={(data) =>
+                      onFormValueChange("fromOption", data?.value)
+                    }
                     isSearchable={true}
                   />
-                  {formError && !fromOption && (
+                  {formError && !formValues?.fromOption && (
                     <p className="error-message">From is required</p>
                   )}
                 </div>
@@ -163,15 +152,16 @@ const Flight = () => {
                   <label htmlFor="">To</label>
                   <Select
                     className={`inputs custom-select ${
-                      formError && !toOption ? "error" : ""
+                      formError && !formValues?.toOption ? "error" : ""
                     }`}
                     options={optionList}
                     placeholder="Eg. Kathmandu"
-                    value={toOption}
-                    onChange={handleToSelect}
+                    onChange={(data) =>
+                      onFormValueChange("toOption", data?.value)
+                    }
                     isSearchable={true}
                   />{" "}
-                  {formError && !toOption && (
+                  {formError && !formValues?.toOption && (
                     <p className="error-message">To is required</p>
                   )}
                 </div>
@@ -183,10 +173,11 @@ const Flight = () => {
                       formError ? "error" : ""
                     }`}
                     options={optionWayList}
-                    value={selectTripOption}
-                    onChange={(option) => setSelectTripOption(option)}
+                    onChange={(data) =>
+                      onFormValueChange("tripOption", data?.value)
+                    }
                   ></Select>
-                  {formError && !selectTripOption && (
+                  {formError && !formValues?.tripOption && (
                     <p className="error-message">Trip is required</p>
                   )}
                 </div>
@@ -198,8 +189,10 @@ const Flight = () => {
                     type="text"
                     className="input"
                     placeholder={`${
-                      adultCount + childCount
-                    } Passenger - ${adultCount} Adult, ${childCount} Child`}
+                      formValues?.adultCount + formValues?.childCount
+                    } Passenger - ${formValues?.adultCount} Adult, ${
+                      formValues?.childCount
+                    } Child`}
                     readOnly
                   />
                   {showPassengerBox && (
@@ -221,15 +214,16 @@ const Flight = () => {
                   <label htmlFor="">Depature date</label>
                   <DatePicker
                     className={`date-inputs ${
-                      formError && !departureDate ? "error" : ""
+                      formError && !formValues?.departureDate ? "error" : ""
                     }`}
-                    selected={departureDate}
-                    onChange={handleDepartureDate}
+                    selected={formValues?.depatureDate}
+                    value={formValues?.depatureDate}
+                    onChange={(date) => onFormValueChange("depatureDate", date)}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="Select a date"
                     minDate={new Date()}
                   />
-                  {formError && !departureDate && (
+                  {formError && !formValues?.depatureDate && (
                     <p className="error-message">Departure date is required</p>
                   )}
                 </div>
@@ -238,17 +232,19 @@ const Flight = () => {
                   <label htmlFor="">Return Date</label>
                   <DatePicker
                     className="date-inputs"
-                    selected={returnDate}
-                    onChange={handleReturnDate}
+                    selected={formValues?.returnDate}
+                    value={formValues?.returnDate}
+                    onChange={(date) => onFormValueChange("returnDate", date)}
                     dateFormat="dd/MM/yyyy"
                     placeholderText="Select a date"
                     disabled={
-                      !departureDate || selectTripOption?.value === "One Way"
+                      !formValues?.depatureDate ||
+                      formValues?.tripOption === "One Way"
                     }
-                    minDate={departureDate}
+                    minDate={formValues?.departureDate}
                   />
                   {formError &&
-                    selectTripOption?.value == "Two Way" &&
+                    formValues?.selectTripOption === "Two Way" &&
                     !returnDate && (
                       <p className="error-message">Return date is required</p>
                     )}
@@ -256,9 +252,7 @@ const Flight = () => {
               </div>
             </div>
             <div className="btn">
-              <button onClick={() => handleValidation(selectTripOption)}>
-                Search
-              </button>
+              <button onClick={() => handleValidation()}>Search</button>
             </div>
           </div>
         </>
@@ -271,15 +265,18 @@ const Flight = () => {
               <div className="textarea-div">
                 <label htmlFor="">From</label>
                 <Select
-                  className="inputs"
+                  className={`inputs custom-select ${
+                    formError && !formValues?.fromOption ? "error" : ""
+                  }`}
                   options={optionList}
                   placeholder="Eg. Kathmandu"
-                  value={fromOption}
-                  onChange={handleFromSelect}
+                  onChange={(data) =>
+                    onFormValueChange("fromOption", data?.value)
+                  }
                   isSearchable={true}
                 />
-                {formError && !fromOption && (
-                  <p className="error-message">Form is required</p>
+                {formError && !formValues?.fromOption && (
+                  <p className="error-message">From is required</p>
                 )}
               </div>
             </div>
@@ -290,11 +287,12 @@ const Flight = () => {
                   className="inputs"
                   options={optionList}
                   placeholder="Eg. Kathmandu"
-                  value={toOption}
-                  onChange={handleToSelect}
+                  onChange={(data) =>
+                    onFormValueChange("toOption", data?.value)
+                  }
                   isSearchable={true}
                 />{" "}
-                {formError && !toOption && (
+                {formError && !formValues?.toOption && (
                   <p className="error-message">To is required</p>
                 )}
               </div>
@@ -304,14 +302,17 @@ const Flight = () => {
               <div className="textarea-div">
                 <label htmlFor="">Depature date</label>
                 <DatePicker
-                  className="date-inputs"
-                  selected={departureDate}
-                  onChange={handleDepartureDate}
+                  className={`date-inputs ${
+                    formError && !formValues?.depatureDate ? "error" : ""
+                  }`}
+                  selected={formValues?.depatureDate}
+                  value={formValues?.depatureDate}
+                  onChange={(date) => onFormValueChange("depatureDate", date)}
                   dateFormat="dd/MM/yyyy"
                   placeholderText="Select a date"
                   minDate={new Date()}
                 />
-                {formError && !departureDate && (
+                {formError && !formValues?.depatureDate && (
                   <p className="error-message">Departure date is required</p>
                 )}
               </div>
@@ -336,7 +337,7 @@ const Flight = () => {
     }
   };
   return (
-    <div className="main-card container">
+    <div className="main-card container" style={{ marginTop: "200px" }}>
       <div className="Card">
         <div className="option-select">
           <p>

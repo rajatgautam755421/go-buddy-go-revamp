@@ -140,11 +140,10 @@ $btnHoverColor: #714c1c;
               border: none;
               height: 40px;
               border-radius: 5px;
-              padding-left:.5rem ;
+              padding-left: 0.5rem;
               &::placeholder {
                 font-size: 15px;
                 padding: 0.5rem;
-                
               }
               &:focus {
                 outline: none;
@@ -238,9 +237,9 @@ $btnHoverColor: #714c1c;
 
               &:focus {
                 color: black;
-                border:none;
+                border: none;
                 outline: none;
-                &::after{
+                &::after {
                   border: none;
                   outline: none;
                 }
