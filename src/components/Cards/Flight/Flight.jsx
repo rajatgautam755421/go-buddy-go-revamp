@@ -241,11 +241,11 @@ const Flight = () => {
                       !formValues?.depatureDate ||
                       formValues?.tripOption === "One Way"
                     }
-                    minDate={formValues?.departureDate}
+                    minDate={formValues?.depatureDate}
                   />
                   {formError &&
-                    formValues?.selectTripOption === "Two Way" &&
-                    !returnDate && (
+                    formValues?.tripOption === "Two Way" &&
+                    !formValues?.returnDate && (
                       <p className="error-message">Return date is required</p>
                     )}
                 </div>

@@ -4,8 +4,9 @@ import { BiSolidCircle } from "react-icons/bi";
 
 import buddha from "../../../assets/buddha.png";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FlightContext } from "../../context/FormContext";
 
 const PlaneData = [
   {
@@ -133,6 +134,13 @@ const Plane = () => {
   const navigate = useNavigate();
 
   const [selectedFlight, setSelectedFlight] = useState(null);
+
+  // Example Of Context
+
+  const { onFormValueChange, formValues, clearFormValues } =
+    useContext(FlightContext);
+
+  console.log(formValues, "formValues");
 
   const handleSelectFlight = (flight) => {
     setSelectedFlight(flight);
