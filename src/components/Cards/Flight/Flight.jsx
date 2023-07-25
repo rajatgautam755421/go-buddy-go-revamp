@@ -98,7 +98,7 @@ const Flight = () => {
       setFormError(true);
       return;
     } else if (
-      formValues?.selectTripOption === "Two Way" &&
+      formValues?.tripOption === "Two Way" &&
       !formValues?.returnDate
     ) {
       setFormError(true);
